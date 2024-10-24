@@ -1,3 +1,4 @@
+document.getElementById('exitBtn').addEventListener('click', exitBoard);
 document.getElementById('createTicketBtn').addEventListener('click', createNewTicket);
 const ticketContainer = document.getElementById('TicketContainer');
 const boardId = new URLSearchParams(window.location.search).get('boardId');
@@ -8,8 +9,8 @@ let draggedElement = null;
 let draggedTicket = null;
 let offsetX = 0;
 let offsetY = 0;
+let tickets = [];
 
-// Initialisera websocket anslutningen
 const socket = new WebSocket('ws://localhost:3000');
 
 socket.onopen = function() {
@@ -25,7 +26,6 @@ socket.onmessage = function(event) {
     const msg = JSON.parse(event.data);
     switch (msg.type) {
         case 'init':
-            // Laddar alla tickets som finns i websocketen
             msg.tickets.forEach(ticket => {
                 createTicketElement(ticket);
             });
@@ -45,7 +45,11 @@ socket.onmessage = function(event) {
     }
 };
 
-function createNewTicket() {
+function exitBoard() {
+    window.location.href = '/boards';
+}
+
+async function createNewTicket() {
     const ticketId = generateUniqueId();
     const ticket = {
         id: ticketId,
@@ -60,6 +64,8 @@ function createNewTicket() {
         ticket: ticket
     };
     socket.send(JSON.stringify(msg));
+
+    await saveTicketToAPI(ticket);
 }
 
 function createTicketElement(ticket) {
@@ -76,18 +82,21 @@ function createTicketElement(ticket) {
             ticket: ticket
         };
         socket.send(JSON.stringify(msg));
+        saveTicketToAPI(ticket); 
     });
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
     removeButton.innerHTML = 'x';
-    removeButton.addEventListener('click', () => {
+    removeButton.addEventListener('click', async () => {
         ticketContainer.removeChild(ticketDiv);
         const msg = {
             type: 'deleteTicket',
             ticketId: ticket.id
         };
         socket.send(JSON.stringify(msg));
+
+        await deleteTicketFromAPI(ticket.id);
     });
     ticketDiv.appendChild(removeButton);
 
@@ -169,11 +178,77 @@ function moveTicketElement(ticket) {
     }
 }
 
-// Temporär lösning för att generera unika id:n
 function generateUniqueId() {
     return '_' + Math.random().toString(36).substr(2, 9);
 }
 
+async function fetchAllTicketsFromAPI() {
+    try {
+        const response = await fetch(`http://localhost:3000/api/boards/${boardId}/tickets`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const tickets = await response.json();
+            tickets.forEach(ticket => createTicketElement(ticket));
+        } else {
+            console.error('Failed to fetch tickets:', await response.text());
+        }
+    } catch (error) {
+        console.error('Error fetching tickets from API:', error);
+    }
+}
+
+async function saveTicketToAPI() {
+    try {
+        for (const ticket of tickets) {
+            const response = await fetch(`http://localhost:3000/api/boards/tickets/${ticket.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ticket)
+            });
+
+            if (!response.ok) {
+                console.error(`Error saving ticket ${ticket.id}:`, await response.text());
+            }
+        }
+        console.log('All tickets saved successfully!');
+    } catch (error) {
+        console.error('Error saving tickets:', error);
+    }
+}
+
+document.getElementById('saveAllBtn').addEventListener('click', saveTicketToAPI);
+
+setInterval(() => {
+    saveTicketToAPI();
+}, 60000);
+
+async function deleteTicketFromAPI(ticketId) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/boards/tickets/${ticketId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            console.error('Error deleting ticket from API');
+        }
+    } catch (error) {
+        console.error('Error deleting ticket:', error);
+    }
+}
+
 window.onload = function() {
     document.getElementById('title').innerText = boardName;
+    fetchAllTicketsFromAPI(); 
 };

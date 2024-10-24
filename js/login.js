@@ -1,4 +1,5 @@
 document.getElementById('loginForm').addEventListener('submit', async function (event) {
+    localStorage.clear();
     event.preventDefault();
 
     const username = document.getElementById('username').value;
@@ -23,8 +24,9 @@ document.getElementById('loginForm').addEventListener('submit', async function (
         if (response.status === 200) {
             console.log(data.message);
             console.log("Token: ", data.token);
-            /* lägger in token i localstorage */
             localStorage.setItem('token', data.token);
+
+            window.location.href = '/boards'; 
         } else {
             alert(data.message);
         }

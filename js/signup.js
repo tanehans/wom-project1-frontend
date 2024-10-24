@@ -22,7 +22,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
         
         if (response.status === 201) {
             alert('User created successfully');
-            window.location.href = '/login.html';
+            window.location.href = '/'; 
         } else {
             alert(data.message);
         }
