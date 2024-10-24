@@ -7,7 +7,7 @@ document.getElementById('signupForm').addEventListener('submit', async function 
     console.log('username:', username, 'password:', password);
 
     try {
-        const response = await fetch('http://localhost:3000/api/users/signup', {
+        const response = await fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/users/signup', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

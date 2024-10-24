@@ -8,7 +8,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
     console.log('username:', username, 'password:', password);
 
     try {
-        const response = await fetch('http://localhost:3000/api/users/login', {
+        const response = await fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/users/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -26,7 +26,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
             console.log("Token: ", data.token);
             localStorage.setItem('token', data.token);
 
-            window.location.href = '/boards'; 
+            window.location.href = '/boards.html'; 
         } else {
             alert(data.message);
         }

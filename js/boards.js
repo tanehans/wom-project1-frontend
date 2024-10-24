@@ -11,7 +11,7 @@ document.getElementById('createBoardForm').addEventListener('submit', async func
     const boardName = document.getElementById('boardName').value;
 
     try {
-        const response = await fetch('http://localhost:3000/api/boards', {
+        const response = await fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ document.getElementById('createBoardForm').addEventListener('submit', async func
 
 async function getBoards() {
     try {
-        const response = await fetch('http://localhost:3000/api/boards', {
+        const response = await fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -70,3 +70,32 @@ function displayBoards(boards) {
         boardsList.appendChild(listItem);
     });
 }
+
+/* function getUsers() {
+    const usersList = document.getElementById('usersList');
+    fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/users/users', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        data.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.textContent = user.name;
+            usersList.appendChild(listItem);
+            listItem.
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+} */
+
+/* function addFriend() {
+    fetch
+
+ */
+getUsers();

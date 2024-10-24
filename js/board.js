@@ -11,9 +11,9 @@ let offsetX = 0;
 let offsetY = 0;
 let tickets = [];
 
-const socket = new WebSocket('ws://localhost:3000');
+const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');
 
-socket.onopen = function() {
+socket.onopen = function () {
     const joinMsg = {
         type: 'join',
         token: token,
@@ -22,10 +22,11 @@ socket.onopen = function() {
     socket.send(JSON.stringify(joinMsg));
 };
 
-socket.onmessage = function(event) {
+socket.onmessage = function (event) {
     const msg = JSON.parse(event.data);
     switch (msg.type) {
         case 'init':
+
             msg.tickets.forEach(ticket => {
                 createTicketElement(ticket);
             });
@@ -46,7 +47,7 @@ socket.onmessage = function(event) {
 };
 
 function exitBoard() {
-    window.location.href = '/boards';
+    window.location.href = '/boards.html';
 }
 
 async function createNewTicket() {
@@ -96,6 +97,7 @@ function createTicketElement(ticket) {
         };
         socket.send(JSON.stringify(msg));
 
+        
         await deleteTicketFromAPI(ticket.id);
     });
     ticketDiv.appendChild(removeButton);
@@ -184,7 +186,7 @@ function generateUniqueId() {
 
 async function fetchAllTicketsFromAPI() {
     try {
-        const response = await fetch(`http://localhost:3000/api/boards/${boardId}/tickets`, {
+        const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/${boardId}/tickets`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -194,7 +196,7 @@ async function fetchAllTicketsFromAPI() {
 
         if (response.ok) {
             const tickets = await response.json();
-            tickets.forEach(ticket => createTicketElement(ticket));
+            tickets.forEach(ticket => createTicketElement(ticket));  // Add each ticket to the board
         } else {
             console.error('Failed to fetch tickets:', await response.text());
         }
@@ -205,8 +207,9 @@ async function fetchAllTicketsFromAPI() {
 
 async function saveTicketToAPI() {
     try {
+        // Loop through each ticket and save/update individually
         for (const ticket of tickets) {
-            const response = await fetch(`http://localhost:3000/api/boards/tickets/${ticket.id}`, {
+            const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/tickets/${ticket.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -224,7 +227,6 @@ async function saveTicketToAPI() {
         console.error('Error saving tickets:', error);
     }
 }
-
 document.getElementById('saveAllBtn').addEventListener('click', saveTicketToAPI);
 
 setInterval(() => {
@@ -233,7 +235,7 @@ setInterval(() => {
 
 async function deleteTicketFromAPI(ticketId) {
     try {
-        const response = await fetch(`http://localhost:3000/api/boards/tickets/${ticketId}`, {
+        const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/tickets/${ticketId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -248,7 +250,7 @@ async function deleteTicketFromAPI(ticketId) {
     }
 }
 
-window.onload = function() {
+window.onload = function () {
     document.getElementById('title').innerText = boardName;
-    fetchAllTicketsFromAPI(); 
+    fetchAllTicketsFromAPI();
 };
