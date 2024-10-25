@@ -94,7 +94,6 @@ function getUsers() {
                     alert('You cannot add yourself as a friend');
                     return;
                 }
-                alert('User clicked: ' + user.name);
                 addFriend(user.id);
             });
         });
