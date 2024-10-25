@@ -77,8 +77,10 @@ function createNewTicket() {
         type: 'createTicket',
         ticket: ticket
     };
+    console.log('Sending message:', msg);
     socket.send(JSON.stringify(msg));
 }
+
 
 function debounce(func, wait) {
     let timeout;
@@ -88,6 +90,22 @@ function debounce(func, wait) {
     };
 }
 
+const debouncedUpdate = debounce((action, ticket) => {
+    let msg;
+    if (action === 'update') {
+        msg = {
+            type: 'updateTicket',
+            ticket: ticket
+        };
+    } else if (action === 'delete') {
+        msg = {
+            type: 'deleteTicket',
+            ticketId: ticket.id
+        };
+    }
+    socket.send(JSON.stringify(msg));
+}, 500);
+
 function createTicketElement(ticket) {
     const ticketDiv = document.createElement('div');
     ticketDiv.classList.add('ticket');
@@ -95,79 +113,34 @@ function createTicketElement(ticket) {
 
     const textArea = document.createElement('textarea');
     textArea.classList.add('textarea');
-    textArea.value = ticket.content || ''; 
-
-    const debouncedUpdate = debounce((ticket) => {
-        const msg = {
-            type: 'updateTicket',
-            ticket: ticket
-        };
-        socket.send(JSON.stringify(msg));
-    }, 500); 
+    textArea.value = ticket.content || '';
 
     textArea.addEventListener('input', () => {
         ticket.content = textArea.value;
-        debouncedUpdate(ticket);
+        debouncedUpdate('update', ticket);  
     });
-
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
     removeButton.classList.add('ticketbutton');
     removeButton.innerHTML = 'x';
     removeButton.addEventListener('click', () => {
-        ticketContainer.removeChild(ticketDiv);
-        const msg = {
-            type: 'deleteTicket',
-            ticketId: ticket.id
-        };
-        socket.send(JSON.stringify(msg));
+        debouncedUpdate('delete', ticket); 
+        setTimeout(() => {
+            ticketContainer.removeChild(ticketDiv);
+        }, 500); 
     });
     ticketDiv.appendChild(removeButton);
 
-    const top = ticket.position?.top ?? 50; 
-    const left = ticket.position?.left ?? 50;  
+    const top = ticket.position?.top ?? 50;
+    const left = ticket.position?.left ?? 50;
 
     ticketDiv.style.top = `${top}px`;
     ticketDiv.style.left = `${left}px`;
-
     ticketDiv.addEventListener('mousedown', (event) => startDragging(event, ticketDiv, ticket));
     document.addEventListener('mouseup', stopDragging);
 
     ticketContainer.appendChild(ticketDiv);
-}
-
-function startDragging(e, ticketDiv, ticket) {
-    if (e.target.tagName === 'TEXTAREA') return;
-
-    draggedElement = ticketDiv;
-    draggedTicket = ticket;
-    draggedElement.classList.add('dragging');
-
-    const ticketRect = ticketDiv.getBoundingClientRect();
-    offsetX = e.clientX - ticketRect.left;
-    offsetY = e.clientY - ticketRect.top;
-
-    document.addEventListener('mousemove', dragElement);
-}
-
-let ticketUpdates = [];
-
-function batchUpdates() {
-    if (ticketUpdates.length > 0) {
-        const msg = {
-            type: 'batchUpdate',
-            tickets: ticketUpdates
-        };
-        socket.send(JSON.stringify(msg));
-        ticketUpdates = [];
-    }
-}
-
-setInterval(batchUpdates, 100);
-
-function addUpdate(ticket) {
-    ticketUpdates.push(ticket);
 }
 
 function dragElement(e) {
@@ -186,9 +159,22 @@ function dragElement(e) {
     draggedTicket.position.top = newY;
     draggedTicket.position.left = newX;
 
-    addUpdate(draggedTicket);
+    debouncedUpdate('update', draggedTicket);  
 }
 
+function startDragging(e, ticketDiv, ticket) {
+    if (e.target.tagName === 'TEXTAREA') return;
+
+    draggedElement = ticketDiv;
+    draggedTicket = ticket;
+    draggedElement.classList.add('dragging');
+
+    const ticketRect = ticketDiv.getBoundingClientRect();
+    offsetX = e.clientX - ticketRect.left;
+    offsetY = e.clientY - ticketRect.top;
+
+    document.addEventListener('mousemove', dragElement);
+}
 
 function stopDragging() {
     if (draggedElement) {
@@ -199,6 +185,8 @@ function stopDragging() {
     document.removeEventListener('mousemove', dragElement);
 }
 
+
+
 function updateTicketElement(ticket) {
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticket.id}']`);
     if (ticketDiv) {
@@ -208,6 +196,7 @@ function updateTicketElement(ticket) {
 }
 
 function deleteTicketElement(ticketId) {
+    console.log('Deleting ticket with ID:', ticketId); 
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticketId}']`);
     if (ticketDiv) {
         ticketContainer.removeChild(ticketDiv);
