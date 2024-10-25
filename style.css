@@ -114,6 +114,17 @@ a:hover {
     list-style-type: none; 
 }
 
+#usersList li {
+    background-color: hsl(226, 53%, 34%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#usersList li:hover {
+    background-color: hsl(226, 53%, 34%);
+}
+
 ul li {
     background-color: #f9f9f9;
     padding: 10px 20px;
@@ -177,23 +188,27 @@ ul li {
 .ticket button.ticketbutton {
     position: absolute;
     bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 5px; 
     background-color: transparent;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 12px; 
     color: #ff0000;
+    padding: 0; 
+    width: auto; 
+    height: auto; 
     outline: none;
 }
+
+.ticket button.ticketbutton:hover {
+    color: #d40000; 
+}
+
 
 .ticket:hover {
     transform: scale(1.05);
 }
 
-.ticket:hover button.ticketbutton {
-    color: #d40000;
-}
 
 #boardActions {
     display: flex;
