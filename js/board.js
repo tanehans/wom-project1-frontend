@@ -42,8 +42,14 @@ socket.onmessage = function (event) {
         case 'moveTicket':
             moveTicketElement(msg.ticket);
             break;
+        case 'batchUpdate':
+            msg.tickets.forEach(ticket => {
+                moveTicketElement(ticket);
+            });
+            break;
     }
 };
+
 
 function exitBoard() {
     window.location.href = '/boards.html';
@@ -65,26 +71,40 @@ function createNewTicket() {
     socket.send(JSON.stringify(msg));
 }
 
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 function createTicketElement(ticket) {
     const ticketDiv = document.createElement('div');
     ticketDiv.classList.add('ticket');
     ticketDiv.dataset.ticketId = ticket.id;
 
     const textArea = document.createElement('textarea');
-    textArea.classList.add('textarea')
+    textArea.classList.add('textarea');
     textArea.value = ticket.content || ''; 
-    textArea.addEventListener('input', () => {
-        ticket.content = textArea.value;
+
+    const debouncedUpdate = debounce((ticket) => {
         const msg = {
             type: 'updateTicket',
             ticket: ticket
         };
         socket.send(JSON.stringify(msg));
+    }, 500); 
+
+    textArea.addEventListener('input', () => {
+        ticket.content = textArea.value;
+        debouncedUpdate(ticket);
     });
+
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
-    removeButton.classList.add('ticketbutton')
+    removeButton.classList.add('ticketbutton');
     removeButton.innerHTML = 'x';
     removeButton.addEventListener('click', () => {
         ticketContainer.removeChild(ticketDiv);
@@ -122,6 +142,25 @@ function startDragging(e, ticketDiv, ticket) {
     document.addEventListener('mousemove', dragElement);
 }
 
+let ticketUpdates = [];
+
+function batchUpdates() {
+    if (ticketUpdates.length > 0) {
+        const msg = {
+            type: 'batchUpdate',
+            tickets: ticketUpdates
+        };
+        socket.send(JSON.stringify(msg));
+        ticketUpdates = [];
+    }
+}
+
+setInterval(batchUpdates, 100);
+
+function addUpdate(ticket) {
+    ticketUpdates.push(ticket);
+}
+
 function dragElement(e) {
     if (!draggedElement) return;
 
@@ -138,12 +177,9 @@ function dragElement(e) {
     draggedTicket.position.top = newY;
     draggedTicket.position.left = newX;
 
-    const msg = {
-        type: 'moveTicket',
-        ticket: draggedTicket
-    };
-    socket.send(JSON.stringify(msg));
+    addUpdate(draggedTicket);
 }
+
 
 function stopDragging() {
     if (draggedElement) {
