@@ -11,8 +11,7 @@ let offsetX = 0;
 let offsetY = 0;
 let tickets = [];
 
-// Initialize WebSocket connection
-const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');  // Change this to your WebSocket server address
+const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');  
 
 socket.onopen = function () {
     const joinMsg = {
@@ -27,7 +26,6 @@ socket.onmessage = function (event) {
     const msg = JSON.parse(event.data);
     switch (msg.type) {
         case 'init':
-            // Load all tickets that exist from WebSocket message
             msg.tickets.forEach(ticket => {
                 createTicketElement(ticket);
             });
@@ -51,12 +49,11 @@ function exitBoard() {
     window.location.href = '/boards.html';
 }
 
-// Create a new ticket and send to WebSocket
 function createNewTicket() {
     const ticket = {
         id: generateUniqueId(),
         content: '',
-        position: { top: 50, left: 50 }  // Set default position for new ticket
+        position: { top: 50, left: 50 } 
     };
 
     createTicketElement(ticket);
@@ -97,9 +94,8 @@ function createTicketElement(ticket) {
     });
     ticketDiv.appendChild(removeButton);
 
-    // Ensure ticket.position exists and has valid top/left values
-    const top = ticket.position?.top ?? 50;  // Default to 50px if undefined
-    const left = ticket.position?.left ?? 50;  // Default to 50px if undefined
+    const top = ticket.position?.top ?? 50; 
+    const left = ticket.position?.left ?? 50;  
 
     ticketDiv.style.top = `${top}px`;
     ticketDiv.style.left = `${left}px`;
@@ -174,7 +170,6 @@ function deleteTicketElement(ticketId) {
 function moveTicketElement(ticket) {
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticket.id}']`);
     if (ticketDiv) {
-        // Ensure ticket.position exists and has valid top/left values
         const top = ticket.position?.top ?? 50;
         const left = ticket.position?.left ?? 50;
 
@@ -183,12 +178,10 @@ function moveTicketElement(ticket) {
     }
 }
 
-// Helper to generate unique IDs
 function generateUniqueId() {
     return '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// On page load, set the board name
 window.onload = function () {
     document.getElementById('title').innerText = boardName;
 };
