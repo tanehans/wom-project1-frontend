@@ -9,11 +9,10 @@ let draggedElement = null;
 let draggedTicket = null;
 let offsetX = 0;
 let offsetY = 0;
-let tickets = [];
 
-const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');  
+const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net'); 
 
-socket.onopen = function () {
+socket.onopen = function() {
     const joinMsg = {
         type: 'join',
         token: token,
@@ -22,10 +21,11 @@ socket.onopen = function () {
     socket.send(JSON.stringify(joinMsg));
 };
 
-socket.onmessage = function (event) {
+socket.onmessage = function(event) {
     const msg = JSON.parse(event.data);
     switch (msg.type) {
         case 'init':
+            // Laddar alla tickets som finns i websocketen
             msg.tickets.forEach(ticket => {
                 createTicketElement(ticket);
             });
@@ -50,10 +50,11 @@ function exitBoard() {
 }
 
 function createNewTicket() {
+    const ticketId = generateUniqueId();
     const ticket = {
-        id: generateUniqueId(),
+        id: ticketId,
         content: '',
-        position: { top: 50, left: 50 } 
+        position: { top: 50, left: 50 }
     };
 
     createTicketElement(ticket);
@@ -68,11 +69,12 @@ function createNewTicket() {
 function createTicketElement(ticket) {
     const ticketDiv = document.createElement('div');
     ticketDiv.classList.add('ticket');
+    ticketDiv.classList.add('ticket');
     ticketDiv.dataset.ticketId = ticket.id;
 
     const textArea = document.createElement('textarea');
     textArea.classList.add('textarea')
-    textArea.value = ticket.content || ''; 
+    textArea.value = ticket.content;
     textArea.addEventListener('input', () => {
         ticket.content = textArea.value;
         const msg = {
@@ -96,11 +98,8 @@ function createTicketElement(ticket) {
     });
     ticketDiv.appendChild(removeButton);
 
-    const top = ticket.position?.top ?? 50; 
-    const left = ticket.position?.left ?? 50;  
-
-    ticketDiv.style.top = `${top}px`;
-    ticketDiv.style.left = `${left}px`;
+    ticketDiv.style.top = `${ticket.position.top}px`;
+    ticketDiv.style.left = `${ticket.position.left}px`;
 
     ticketDiv.addEventListener('mousedown', (event) => startDragging(event, ticketDiv, ticket));
     document.addEventListener('mouseup', stopDragging);
@@ -172,18 +171,16 @@ function deleteTicketElement(ticketId) {
 function moveTicketElement(ticket) {
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticket.id}']`);
     if (ticketDiv) {
-        const top = ticket.position?.top ?? 50;
-        const left = ticket.position?.left ?? 50;
-
-        ticketDiv.style.top = `${top}px`;
-        ticketDiv.style.left = `${left}px`;
+        ticketDiv.style.top = `${ticket.position.top}px`;
+        ticketDiv.style.left = `${ticket.position.left}px`;
     }
 }
 
+// Temporär lösning för att generera unika id:n
 function generateUniqueId() {
     return '_' + Math.random().toString(36).substr(2, 9);
 }
 
-window.onload = function () {
+window.onload = function() {
     document.getElementById('title').innerText = boardName;
 };
