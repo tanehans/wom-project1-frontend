@@ -11,7 +11,7 @@ let offsetX = 0;
 let offsetY = 0;
 let tickets = [];
 
-const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');
+const socket = new WebSocket('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net');  
 
 socket.onopen = function () {
     const joinMsg = {
@@ -26,7 +26,6 @@ socket.onmessage = function (event) {
     const msg = JSON.parse(event.data);
     switch (msg.type) {
         case 'init':
-
             msg.tickets.forEach(ticket => {
                 createTicketElement(ticket);
             });
@@ -50,12 +49,11 @@ function exitBoard() {
     window.location.href = '/boards.html';
 }
 
-async function createNewTicket() {
-    const ticketId = generateUniqueId();
+function createNewTicket() {
     const ticket = {
-        id: ticketId,
+        id: generateUniqueId(),
         content: '',
-        position: { top: 50, left: 50 }
+        position: { top: 50, left: 50 } 
     };
 
     createTicketElement(ticket);
@@ -65,8 +63,6 @@ async function createNewTicket() {
         ticket: ticket
     };
     socket.send(JSON.stringify(msg));
-
-    await saveTicketToAPI(ticket);
 }
 
 function createTicketElement(ticket) {
@@ -75,7 +71,7 @@ function createTicketElement(ticket) {
     ticketDiv.dataset.ticketId = ticket.id;
 
     const textArea = document.createElement('textarea');
-    textArea.value = ticket.content;
+    textArea.value = ticket.content || ''; 
     textArea.addEventListener('input', () => {
         ticket.content = textArea.value;
         const msg = {
@@ -83,27 +79,26 @@ function createTicketElement(ticket) {
             ticket: ticket
         };
         socket.send(JSON.stringify(msg));
-        saveTicketToAPI(ticket); 
     });
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
     removeButton.innerHTML = 'x';
-    removeButton.addEventListener('click', async () => {
+    removeButton.addEventListener('click', () => {
         ticketContainer.removeChild(ticketDiv);
         const msg = {
             type: 'deleteTicket',
             ticketId: ticket.id
         };
         socket.send(JSON.stringify(msg));
-
-        
-        await deleteTicketFromAPI(ticket.id);
     });
     ticketDiv.appendChild(removeButton);
 
-    ticketDiv.style.top = `${ticket.position.top}px`;
-    ticketDiv.style.left = `${ticket.position.left}px`;
+    const top = ticket.position?.top ?? 50; 
+    const left = ticket.position?.left ?? 50;  
+
+    ticketDiv.style.top = `${top}px`;
+    ticketDiv.style.left = `${left}px`;
 
     ticketDiv.addEventListener('mousedown', (event) => startDragging(event, ticketDiv, ticket));
     document.addEventListener('mouseup', stopDragging);
@@ -175,8 +170,11 @@ function deleteTicketElement(ticketId) {
 function moveTicketElement(ticket) {
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticket.id}']`);
     if (ticketDiv) {
-        ticketDiv.style.top = `${ticket.position.top}px`;
-        ticketDiv.style.left = `${ticket.position.left}px`;
+        const top = ticket.position?.top ?? 50;
+        const left = ticket.position?.left ?? 50;
+
+        ticketDiv.style.top = `${top}px`;
+        ticketDiv.style.left = `${left}px`;
     }
 }
 
@@ -184,73 +182,6 @@ function generateUniqueId() {
     return '_' + Math.random().toString(36).substr(2, 9);
 }
 
-async function fetchAllTicketsFromAPI() {
-    try {
-        const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/${boardId}/tickets`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            const tickets = await response.json();
-            tickets.forEach(ticket => createTicketElement(ticket));  // Add each ticket to the board
-        } else {
-            console.error('Failed to fetch tickets:', await response.text());
-        }
-    } catch (error) {
-        console.error('Error fetching tickets from API:', error);
-    }
-}
-
-async function saveTicketToAPI() {
-    try {
-        // Loop through each ticket and save/update individually
-        for (const ticket of tickets) {
-            const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/tickets/${ticket.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(ticket)
-            });
-
-            if (!response.ok) {
-                console.error(`Error saving ticket ${ticket.id}:`, await response.text());
-            }
-        }
-        console.log('All tickets saved successfully!');
-    } catch (error) {
-        console.error('Error saving tickets:', error);
-    }
-}
-document.getElementById('saveAllBtn').addEventListener('click', saveTicketToAPI);
-
-setInterval(() => {
-    saveTicketToAPI();
-}, 60000);
-
-async function deleteTicketFromAPI(ticketId) {
-    try {
-        const response = await fetch(`https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/boards/tickets/${ticketId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            console.error('Error deleting ticket from API');
-        }
-    } catch (error) {
-        console.error('Error deleting ticket:', error);
-    }
-}
-
 window.onload = function () {
     document.getElementById('title').innerText = boardName;
-    fetchAllTicketsFromAPI();
 };
