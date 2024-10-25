@@ -42,23 +42,8 @@ socket.onmessage = function (event) {
         case 'moveTicket':
             moveTicketElement(msg.ticket);
             break;
-        case 'batchUpdate':
-            msg.tickets.forEach(ticket => {
-                moveTicketElement(ticket);
-            });
-            break;
-        case 'ackCreate':
-            console.log(`Ticket ${msg.ticket.id} created successfully.`);
-            break;
-        case 'ackUpdate':
-            console.log(`Ticket ${msg.ticket.id} updated successfully.`);
-            break;
-        case 'ackDelete':
-            console.log(`Ticket ${msg.ticketId} deleted successfully.`);
-            break;
     }
 };
-
 
 function exitBoard() {
     window.location.href = '/boards.html';
@@ -77,34 +62,8 @@ function createNewTicket() {
         type: 'createTicket',
         ticket: ticket
     };
-    console.log('Sending message:', msg);
     socket.send(JSON.stringify(msg));
 }
-
-
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
-
-const debouncedUpdate = debounce((action, ticket) => {
-    let msg;
-    if (action === 'update') {
-        msg = {
-            type: 'updateTicket',
-            ticket: ticket
-        };
-    } else if (action === 'delete') {
-        msg = {
-            type: 'deleteTicket',
-            ticketId: ticket.id
-        };
-    }
-    socket.send(JSON.stringify(msg));
-}, 500);
 
 function createTicketElement(ticket) {
     const ticketDiv = document.createElement('div');
@@ -112,35 +71,55 @@ function createTicketElement(ticket) {
     ticketDiv.dataset.ticketId = ticket.id;
 
     const textArea = document.createElement('textarea');
-    textArea.classList.add('textarea');
-    textArea.value = ticket.content || '';
-
+    textArea.classList.add('textarea')
+    textArea.value = ticket.content || ''; 
     textArea.addEventListener('input', () => {
         ticket.content = textArea.value;
-        debouncedUpdate('update', ticket);  
+        const msg = {
+            type: 'updateTicket',
+            ticket: ticket
+        };
+        socket.send(JSON.stringify(msg));
     });
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
-    removeButton.classList.add('ticketbutton');
+    removeButton.classList.add('ticketbutton')
     removeButton.innerHTML = 'x';
     removeButton.addEventListener('click', () => {
-        debouncedUpdate('delete', ticket); 
-        setTimeout(() => {
-            ticketContainer.removeChild(ticketDiv);
-        }, 500); 
+        ticketContainer.removeChild(ticketDiv);
+        const msg = {
+            type: 'deleteTicket',
+            ticketId: ticket.id
+        };
+        socket.send(JSON.stringify(msg));
     });
     ticketDiv.appendChild(removeButton);
 
-    const top = ticket.position?.top ?? 50;
-    const left = ticket.position?.left ?? 50;
+    const top = ticket.position?.top ?? 50; 
+    const left = ticket.position?.left ?? 50;  
 
     ticketDiv.style.top = `${top}px`;
     ticketDiv.style.left = `${left}px`;
+
     ticketDiv.addEventListener('mousedown', (event) => startDragging(event, ticketDiv, ticket));
     document.addEventListener('mouseup', stopDragging);
 
     ticketContainer.appendChild(ticketDiv);
+}
+
+function startDragging(e, ticketDiv, ticket) {
+    if (e.target.tagName === 'TEXTAREA') return;
+
+    draggedElement = ticketDiv;
+    draggedTicket = ticket;
+    draggedElement.classList.add('dragging');
+
+    const ticketRect = ticketDiv.getBoundingClientRect();
+    offsetX = e.clientX - ticketRect.left;
+    offsetY = e.clientY - ticketRect.top;
+
+    document.addEventListener('mousemove', dragElement);
 }
 
 function dragElement(e) {
@@ -159,21 +138,11 @@ function dragElement(e) {
     draggedTicket.position.top = newY;
     draggedTicket.position.left = newX;
 
-    debouncedUpdate('update', draggedTicket);  
-}
-
-function startDragging(e, ticketDiv, ticket) {
-    if (e.target.tagName === 'TEXTAREA') return;
-
-    draggedElement = ticketDiv;
-    draggedTicket = ticket;
-    draggedElement.classList.add('dragging');
-
-    const ticketRect = ticketDiv.getBoundingClientRect();
-    offsetX = e.clientX - ticketRect.left;
-    offsetY = e.clientY - ticketRect.top;
-
-    document.addEventListener('mousemove', dragElement);
+    const msg = {
+        type: 'moveTicket',
+        ticket: draggedTicket
+    };
+    socket.send(JSON.stringify(msg));
 }
 
 function stopDragging() {
@@ -185,8 +154,6 @@ function stopDragging() {
     document.removeEventListener('mousemove', dragElement);
 }
 
-
-
 function updateTicketElement(ticket) {
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticket.id}']`);
     if (ticketDiv) {
@@ -196,7 +163,6 @@ function updateTicketElement(ticket) {
 }
 
 function deleteTicketElement(ticketId) {
-    console.log('Deleting ticket with ID:', ticketId); 
     const ticketDiv = document.querySelector(`.ticket[data-ticket-id='${ticketId}']`);
     if (ticketDiv) {
         ticketContainer.removeChild(ticketDiv);
