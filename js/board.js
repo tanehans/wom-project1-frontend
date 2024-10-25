@@ -47,6 +47,15 @@ socket.onmessage = function (event) {
                 moveTicketElement(ticket);
             });
             break;
+        case 'ackCreate':
+            console.log(`Ticket ${msg.ticket.id} created successfully.`);
+            break;
+        case 'ackUpdate':
+            console.log(`Ticket ${msg.ticket.id} updated successfully.`);
+            break;
+        case 'ackDelete':
+            console.log(`Ticket ${msg.ticketId} deleted successfully.`);
+            break;
     }
 };
 
