@@ -71,6 +71,7 @@ function createTicketElement(ticket) {
     ticketDiv.dataset.ticketId = ticket.id;
 
     const textArea = document.createElement('textarea');
+    textArea.classList.add('textarea')
     textArea.value = ticket.content || ''; 
     textArea.addEventListener('input', () => {
         ticket.content = textArea.value;
@@ -83,6 +84,7 @@ function createTicketElement(ticket) {
     ticketDiv.appendChild(textArea);
 
     const removeButton = document.createElement('button');
+    removeButton.classList.add('ticketbutton')
     removeButton.innerHTML = 'x';
     removeButton.addEventListener('click', () => {
         ticketContainer.removeChild(ticketDiv);

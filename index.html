@@ -7,21 +7,35 @@
     <link rel="stylesheet" href="style.css">      
 </head>
 <body>
+    <script>
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('loader');
+            setTimeout(function() {
+                loader.style.display = 'none';
+            }, 500); 
+        });
+    </script>
+    <div id="loader">
+        <div class="loader-ring">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+        </div>
+    </div>
+    
     <h1 id="title">Login</h1>
     <form id="loginForm">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
-        <br>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-        <br>
         <button type="submit">Login</button>
     </form>
-    <br>
-    <h2>Users</h2>
-    <ul id="usersList"></ul>
     <b>No account?</b>
     <a href="/signup.html"><button>Signup</button></a>
+    <h2>Users</h2>
+    <ul id="usersList"></ul>
     <script src="js/login.js"></script>
 </body>
 </html>

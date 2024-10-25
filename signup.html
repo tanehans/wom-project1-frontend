@@ -7,6 +7,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <script>
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('loader');
+            setTimeout(function() {
+                loader.style.display = 'none';
+            }, 500); 
+        });
+    </script>
+    <div id="loader">
+        <div class="loader-ring">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="ring"></div>
+        </div>
+    </div>   
     <h1 id="title">Signup</h1>
     <form id="signupForm">
         <label for="username">Username:</label>

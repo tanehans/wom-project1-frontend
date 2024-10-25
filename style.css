@@ -1,10 +1,154 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    text-align: center;
+    flex-direction: column;
+}
+
+#title {
+    text-align: center;
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+button {
+    background-color: hsl(226, 53%, 34%);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: hsl(226, 53%, 34%);
+}
+
+#loginForm {
+    margin-bottom: 20px;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+ul li {
+    background-color: #f9f9f9;
+    margin: 5px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+a {
+    color: hsl(226, 53%, 34%);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+#boardsList a {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: hsl(226, 53%, 34%);
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#boardsList a:hover {
+    background-color: hsl(226, 56%, 26%);
+}
+
+#usersList, #friendsList {
+    display: flex;
+    flex-direction: column; 
+    gap: 10px; 
+    padding: 0;
+    list-style-type: none; 
+}
+
+ul li {
+    background-color: #f9f9f9;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: block; 
+    text-align: center; 
+}
+
+#usersFriendsContainer {
+    display: flex;
+    justify-content: center;
+    gap: 50px; 
+    margin-top: 20px;
+}
+
+
+#boardsList {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
 #TicketContainer {
     position: relative;
     width: 1000px;
     height: 800px;
     border: 2px solid #ccc;
     overflow: hidden;
-    margin: 20px auto;
+    margin: 40px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .ticket {
@@ -15,8 +159,9 @@
     border: 1px solid #ccc;
     padding: 10px;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
     cursor: grab;
-    resize: none;
+    transition: transform 0.1s ease-in-out;
 }
 
 .ticket textarea {
@@ -28,10 +173,12 @@
     outline: none;
     font-size: 14px;
 }
-.ticket button {
+
+.ticket button.ticketbutton {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -40,29 +187,100 @@
     outline: none;
 }
 
-.ticket.dragging {
-    cursor: grabbing;
+.ticket:hover {
+    transform: scale(1.05);
 }
 
-#createTicketBtn {
-    display: block;
-    margin: 10px auto;
+.ticket:hover button.ticketbutton {
+    color: #d40000;
+}
+
+#boardActions {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 800px;
+    margin: 20px auto;
+}
+
+button#exitBtn, button#createTicketBtn, button#inviteFriendBtn {
+    display: inline-block;
     padding: 10px 20px;
-    font-size: 16px;
+    margin: 10px 5px;
+    background-color: hsl(226, 53%, 34%);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto;
 }
-#title {
-    text-align: center;
-    font-size: 60px;
-    margin-bottom: 20px;
-    font-weight: bold;
+
+button#exitBtn:hover, button#createTicketBtn:hover, button#inviteFriendBtn:hover {
+    background-color: hsl(226, 56%, 26%);
 }
-#boardsList {
+
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(10, 10, 10); 
+    z-index: 9999; 
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
+    align-items: center;
 }
 
-body {
-    font-family: 'Courier New', Courier, monospace;
-    text-align: center;
+.loader-ring {
+    position: relative;
+    width: 80px;
+    height: 80px;
+}
+
+.ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid transparent;
+    border-radius: 50%;
+    animation: rotate 1.5s linear infinite;
+}
+
+.ring:nth-child(1) {
+    border-top: 4px solid #1a4dd8; 
+    animation-delay: 0s;
+}
+
+.ring:nth-child(2) {
+    border-top: 4px solid #1163ce; 
+    animation-delay: 0.2s;
+}
+
+.ring:nth-child(3) {
+    border-top: 4px solid #208be9;
+    animation-delay: 0.4s;
+}
+
+.ring:nth-child(4) {
+    border-top: 4px solid #138ee1; 
+    animation-delay: 0.6s;
+}
+
+/* Ring Rotation */
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+.ring:nth-child(1),
+.ring:nth-child(2),
+.ring:nth-child(3),
+.ring:nth-child(4) {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6), 0 0 20px rgba(255, 255, 255, 0.4);
 }
