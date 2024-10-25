@@ -94,7 +94,6 @@ function getUsers() {
                     alert('You cannot add yourself as a friend');
                     return;
                 }
-                alert('User clicked: ' + user.name);
                 addFriend(user.id);
             });
         });
@@ -177,7 +176,6 @@ function getPendingRequests() {
                 acceptButton.addEventListener('click', () => {
                     console.log('Accepting friend request:', request.userId);
                     acceptFriend(request.userId);
-                    location.reload();
                 });
                 listItem.appendChild(acceptButton);
                 const rejectButton = document.createElement('button');
@@ -185,7 +183,6 @@ function getPendingRequests() {
                 rejectButton.addEventListener('click', () => {
                     console.log('Rejecting friend request:', request.userId);
                     rejectFriend(request.userId);
-                    location.reload();
                 });
                 listItem.appendChild(rejectButton);
                 requestsList.appendChild(listItem);
@@ -211,6 +208,7 @@ function acceptFriend(friendId) {
     .then(response => response.json())
     .then(data => {
         console.log('Friend request accepted:', data);
+        location.reload();
     })
     .catch(error => {
         console.error('Error accepting friend request:', error);
@@ -231,6 +229,7 @@ function rejectFriend(friendId) {
     .then(response => response.json())
     .then(data => {
         console.log('Friend request rejected:', data);
+        location.reload();
     })
     .catch(error => {
         console.error('Error rejecting friend request:', error);
