@@ -1,3 +1,4 @@
+let users = [];
 document.getElementById('loginForm').addEventListener('submit', async function (event) {
     localStorage.clear();
     event.preventDefault();
@@ -24,7 +25,10 @@ document.getElementById('loginForm').addEventListener('submit', async function (
         if (response.status === 200) {
             console.log(data.message);
             console.log("Token: ", data.token);
+            localStorage.setItem('username', username);
             localStorage.setItem('token', data.token);
+            const user = users.find(user => user.name === username);
+            localStorage.setItem('userId', user.id);
 
             window.location.href = '/boards.html'; 
         } else {
@@ -35,3 +39,27 @@ document.getElementById('loginForm').addEventListener('submit', async function (
         console.error('Error:', error);
     }
 });
+
+function getUsers() {
+    const usersList = document.getElementById('usersList');
+    fetch('https://wom-projekt-ezgcbya0hfdthsby.westeurope-01.azurewebsites.net/api/users/users', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        users = data;
+        console.log(data);
+        data.forEach(user => {
+            const listItem = document.createElement('li');
+            listItem.textContent = user.name;
+            usersList.appendChild(listItem);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+getUsers();
