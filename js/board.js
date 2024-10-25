@@ -107,6 +107,7 @@ function createTicketElement(ticket) {
     ticketContainer.appendChild(ticketDiv);
 }
 
+// orginella funktionen för dragning tagen från https://dev.to/code_passion/creating-a-draggable-element-using-html-css-and-javascript-54g7
 function startDragging(e, ticketDiv, ticket) {
     if (e.target.tagName === 'TEXTAREA') return;
 
