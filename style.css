@@ -114,14 +114,14 @@ a:hover {
     list-style-type: none; 
 }
 
-#usersList li {
+.boardList li {
     background-color: hsl(226, 53%, 34%);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
-#usersList li:hover {
+.boardList li:hover {
     background-color: hsl(226, 53%, 34%);
 }
 
